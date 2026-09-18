@@ -191,14 +191,14 @@ The short-term scheduler must select a new process for the CPU frequently,
 - A process terminates when it finishes executing its final statement
 - A process asks the operating system to delete it using the `exit()` system call 
 - When a process exits, it returns a status value (usually int) to it's parent process using the `wait()` system call.
-- All resources of the process-- Including physical and veirtual memory, open files, and I/O buffers are deallocated by the OS
-- A process can cause the termination of another process vai an appropriate system call.
+- All resources of the process-- Including physical and virtual memory, open files, and I/O buffers are deallocated by the OS
+- A process can cause the termination of another process via an appropriate system call.
 - A system call like that can only be invoked by the parent of the process to be terminated.
 - The parent needs to know the id of its children if it is to terminate them.
 - Therefore when one process creates a new process, the id of the new process is passed to the parent.
 - A parent may terminate the execution of one of its childen for a variety of reasons
 	- The child has exceeded its usage of some of the resources that it has been allocated
-	- The task assigned to the child is no longer require.
+	- The task assigned to the child is no longer required.
 	- The parent is exiting and the OS does not allow for the child to continue if the parent terminates
 - **Cascading termination** - If a process terminates then all of it's children must also be terminated. This is usually initiated by the OS
 - `exit()` - can be called either directly or indirectly
@@ -207,7 +207,7 @@ The short-term scheduler must select a new process for the CPU frequently,
 - A process that has terminated by whose parent has not yet called `wait()`, is known as a zombie process
 - All processes become a zombie process, but only briefly as once the parent calls wait(), the pid of the zombie process and its entry in the process table are released.
 - When a parent does not invoke wait(), and is instead terminated the child processes are known as orphans. In Unix / Linux the OS assigns the init process as the new parent to orphan processes.
-- The `init()` process invokes `wait()` periodically, thereby allowing the exit status of any orphaned processes to be collected. Thus release the orphan's pid and the process-table entry
+- The `init()` process invokes `wait()` periodically, thereby allowing the exit status of any orphaned processes to be collected. Thus releasing the orphan's pid and the process-table entry
 
 # 3.4 Inter process Communication
 - Process executing concurrently in the operating system may be either independent processes or cooperating processes. 
@@ -225,29 +225,188 @@ The short-term scheduler must select a new process for the CPU frequently,
 	- Message Passing - communication takes place by means of messages exchanged between the cooperating processes. 
 - Both aforementioned models are common in operating systems, and many systems implement both
 - Message passing is useful for exchanging smaller amounts of data, because no conflicts need be avoided. 
-- Message passing is also easier to implement in a stributed system than shared memory. 
+- Message passing is also easier to implement in a distributed system than shared memory. 
 - Shared memory can be faster than message passing, since message-passing systems are typically implemented using system calls and thus require the more time-consuming task of kernel intervention. 
 
 ![[Pasted image 20260917230520.png]]
 
 **Figure 3.12** Communications models. (a) Message passing. (b) Shared memory.
 #### Multiprocess Architecture- Chrome Browser
-- Chrome uses a multiprocess architcture. The browse utilizes three processes
+- Chrome uses a multiprocess architecture. The browse utilizes three processes
 	- The **browser** process is responsible for managing the user interface as well as disk and network I/O. A new browser process is created when Chrome is started. Only one browser process is created.
 	- **Renderer** processes contain logic for rendering web pages. Thus, they contain the logic for handling HTML, Javascript, images, and so forth. As a general rule, a new renderer process is created for each website opened in a new tab, and so several renderer processes may be active at the same time.
 	- A **plug-in** process is created for each type of plug-in (such as Flash or QuickTime) in use. Plug-in processes contain the code for the plug-in as well as additional code that enables the plug-in to communicate with associated renderer processes and the browser process.
 
-### Shared-Memory Systems
-- Inter process communication using shared memory requires communicating procersses to establish a region of shared memory.
+### 3.4.1 Shared-Memory Systems
+- Inter process communication using shared memory requires communicating processes to establish a region of shared memory.
 - A shared memory region resides in the address space of the process creating the share-memory segment.
-- The OS tries to prevent one process from accessing another process's memroy. Shared memory requires that two or more process agree to remove this restriction.
+- The OS tries to prevent one process from accessing another process's memory. Shared memory requires that two or more process agree to remove this restriction.
 	- They can then exchange information by reading and writing data in the shared areas.
-	- The processes are also respondible for ensuring that they are not writing to the same location simultaneously. 
+	- The processes are also responsible for ensuring that they are not writing to the same location simultaneously. 
+- This scheme requires that these processes share a region of memory and that hte code for accessing and manipulating the shared memory be written explicitly by the application programmer. 
 
 #### Producer Consumer Problem
 - A **producer** process produces information that is consumed by a **consumer** process
-- For example,  a compiler may produce assmebly code that is consumed by an assembler. The assembler, in turn, may produce object modules that are consumed by the loader. 
+- For example,  a compiler may produce assembly code that is consumed by an assembler. The assembler, in turn, may produce object modules that are consumed by the loader. 
 - One solution to the producer-consumer problem uses shared memory
 - Two types of buffers can be used
-	-  Unbounded buffer - places no practical limit on the size of the buffer
+	- Unbounded buffer - places no practical limit on the size of the buffer
 	- Bounded buffer assumes a fixed buffer size. The consumer must wait if the buffer is empty and the producer must wait if the buffer is full. 
+### 3.4.2 Message-Passing Systems
+ - Message passing provides provides a mechanism to allow processes to communicate and to synchronize their actions without sharing the same address space. 
+ - It is particularly useful in distributed systems
+ - A message-passing facility provides at least two operations
+	 - send(message)
+	 - receive(message)
+ - Messages sent by a process can either be fixed or variable in size
+	 - fixed size messages are simple from a system-level implementation, but making programming tasks more difficult
+	 - variable-sized messages conversely, require more complex system-level implementation, but the programming tasks are simpler. 
+ - If P and Q want to communicate they must send messages to and receive messages from each other
+	 - A communication link must exist between them. This can be implemented in a variety of ways
+		 - Direct or indirect communication
+		 - Synchronous or asynchronous communication
+		 - Automatic or explicit buffering 
+#### 3.4.2.1 Methods of Communication Link
+#### Direct communication
+ - Each process must explicitly name the recipient or send of the communication. Thus `send()` and r`receive()` would look like this
+	 - send(P, message) - Send a message to process P
+	 - receive(Q, message)___ Received a message from process Q
+ - Properties of this type of communication link
+	 - A link is established automatically between very pair of processes that want to communicate. 
+	 - A link is associated with exactly two processes.
+	 - Between each pair of processes, there exists exactly one link
+	 - This is a symmetrical scheme
+	 - A variant of this could be asymmetrical where the addressing asymmetrical
+		 - send(P, message) - Send a message to process P
+		 - receive(id, message) Receive a message from any process. The variable id is set to the name of the process with which communication has taken place. 
+ - Disadvantages
+	 - Limited modularity. Changing the identifier of a process may necessitate examining all other process definitions. All references to the old identifier must be found so that they can be modified to the new identifier. Such hard-coding techniques, where identifiers must be explicitly state, are less desirable than techniques involving indrection
+##### Indirect Communication
+- Messages are sent to and received from **mailboxes**, or **ports**. A mailbox can be viewed abstracting as an object into which messages can be placed by processes and from which messages can be removed.
+- Mailbox
+	- Unique Identification
+	- Can either be owned either by a process or by the operating system
+- A process can communicate with another process via a number of different mailboxes, but two processes can communicate only if they have a shared mailbox
+- The `send()` and `receive()` primitives look as follows
+	- `send(A, message)` - Send a message to mailbox A
+	- `receive(A, message)` - Receive a message from mailbox A
+- Properties of this type of communication link
+	- A link is established between a pair of processes only if both members of the pair have a shared mailbox
+	- A link may be associated with more than two processes
+	- BEtween each pair of communicating processes a number of different links may exist, with each link corresponding to one mailbox
+
+Now suppose that processes P_1, _P_2, and _P_3 all share mailbox _A. Process P_1 sends a message to _A, while both P_2 and _P_3 execute a receive() from _A. Which process will receive the message sent by P_1? The answer depends on which of the following methods we choose:
+	- Allow a link to be associated with two processes at most.
+	- Allow at most one process at a time to execute a receive() operation.
+	- Allow the system to select arbitrarily which process will receive the message (that is, either _P_2 or _P_3, but not both, will receive the message). The system may define an algorithm for selecting which process will receive the message (for example, _round robin, where processes take turns receiving messages). The system may identify the receiver to the sender.
+- A mailbox can either be owned by a process or by the operating system
+	- Process Owned
+		- The mailbox is part of the address space of the process
+		- The owner can only received messages
+		- The user can only send messages
+		- Since each mailbox has a unique owner, there can be no confusion about which process should receive a message sent to this mailbox
+		- When a process that owns a mailbox terminates, the mailbox disappears.
+		- Any process that sends a message to that mailbox must be notified that the mailbox no longer exists. 
+	- Operating System
+		- Has an existence of its own, independent and not attached to any particular process
+		- The OS must provide a mechanism that allows processes to do the following
+			- Create a new mailbox
+			- Send and receive messages through the mailbox.
+			- Delete a mailbox
+		- The process that creates a new mailbox is that mailbox's owner by default.
+		- Ownership and reciving privilege may be passed to othe rprocess through appropriate system calls.
+
+#### 3.4.2.2 Synchronization
+- Message passing may be either **** or **nonblocking** - also known as **synchronous** and **asynchronous**
+- Types
+	- **Blocking send** - The sending process is blocked until the message is received by the receiving process or mailbox 
+	- **Nonblocking send** - The sending process sends the message and resumes operation 
+	- **Blocking receive** - The receiver blocks until a message is available
+	- **Nonblocking receive** - The receiver retrieves either a valid message or a null
+- When both send and receive are blocking, there exists a rendezvous between the sender and receiver
+	- Solution to the producer-consumer problem is trivial with blocking **send** and **receive**
+		- The producer merely invokes the blocking send and waits until the message is delivered to either the receiver or the mailbox. Likewise, when the consumer invokes receive(), it blocks until a message is available. 
+#### 3.4.2.3 Buffering
+- Whether communication is direct or indirect, messages exchanged by communicating processes reside in a temporary queue, Basically such queues can be implemented three ways
+	- **Zero Capacity** - The queue has a maximum length of zero; thus the link cannot have any messages waiting in it. In this case the sender must block until the recipient receives the message.
+		- Known as a message system with no buffering
+	- Bound Capacity - The queue has finite length n; thus at most n messages can reside in it.
+	- Unbounded Capacity - The queue's length is potentially infinite; thus any number of messages ca n wait with in it. The sender never blocks
+## 3.5 Examples of IPC Systems
+
+
+## 3.6 Communication in Client-Server Systems
+
+## 3.6.1 Sockets
+- A socket is defined as an endpoint for communication.  A pair of processes communicating over a network employs a pair of sockets - one for each process.
+- A socket is identified by an IP address concatenated with a port number. 
+	- e.g. 192.23.2.53:1060
+- In general sockets use a client-server architecture. The server waits for incoming client requests by listening to a specified port. Once a request is received, the server accepts a connection from the client socket to complete the connection. Servers implementing specific services( such as telnet, FTP and HTTP) listen to well known ports 
+	- a telnet server listens to port 23; 
+	- an FTP sever listens to port 21
+	- a web or HTTP server listens to port 80
+- All ports below 1024 are considered well known; We use them to implement standard services
+- When a client process initiates a request for a connection it is assigned a port by its computer and the port number must be greater than 1024, it will request a connection with the webserver at port 80
+- All connections must unique, so if another client process wants to make a request to the webserver, it will have another port number greater than 1024 assigned to it
+- Java provides three different types of sockets
+	- Connection-oriented (TCP) sockets
+	- Connectionless (UDP) sockets
+		- Multicast Sockets
+- How a date server (java) communicates with TCP sockets
+	- The clients request the current date and time from the server. 
+	- The server listens to port 6012 or any arbitrary port > 1024. 
+	- The server blocks on the accept() method and waits for a client ro request a connection
+	- When a connection request is received, the accept() method returns a socket that the server can use to communicate with the client. 
+	- The server first establishes a printerwriter object that it will use to communicate with the client.
+		- A printwriter object allows the server to write to the socket using the routine print() and println() methods
+		- The server process sends the date to the client calling the method println(). 
+		- Once it has written the date to the socket, the server closes the socket to the client and resumes listening for more requests. 
+	- A socket is common and efficient
+	- Considered a low-level form of communication between distrbuted processes.
+		- One reason is that sockets allow only an unstructred stream of bytes to be exchanged between the communicating threads.
+		- It is the responsibility of the client or server application to impose a structure on the data.
+### 3.6.2 Remote Procedure Calls
+- One of the most common forms of remote service is the RPC paradigm,
+- Designed as a way to abstract the procedure-call mechanism for use between systems with network connections. 
+- It is similar to the PC mechanism described in 3.4 and is usually built on top of such a system.
+- Uses a messaged-based communication scheme
+- RPC messages are well structured and thus are no longer just packets of data.
+- Each message is addressed to an RPC daemon listening to a port on the remote system.
+- Contains an identifier specifying the function to execute and the parameters to pass to that function
+	- The function is then executed as requested and any output is sent back to the requester in a separate message
+- A port is simply a number included at the start of a message packet.
+- A system normally has one network address, it can have many ports within that address to differentiate the many network services it supports.   
+>	For instance, if a system wished to allow other systems to be able to list its current users, it would have a daemon supporting such an RPC attached to a port—say, port 3027. Any remote system could obtain the needed information (that is, the list of current users) by sending an RPC message to port 3027 on the server. The data would be received in a reply message.
+- RPC system hides the details that allow communication to take place by providing a stub on the client side.
+- Typically, a separate stub exists for each separate remote procedure. When the client invokes a remote procedure, the RPC system calls the appropriate stub, passing it the parameters provided to the remote procedure. This stub locates the port on the server and marshals the parameters. Parameter marshalling involves packaging the parameters into a form that can be transmitted over a network. The stub then transmits a message to the server using message passing. A similar stub on the server side receives this message and invokes the procedure on the server. IF necessary, return values are passed back to the client using the same technique.
+- One issue that must be dealt with concerns differences in data representation on the client and server machines. Consider the representation of 32-bit integers. 
+	- Some systems (Big-Endian) store the most significant byte first
+	- Other systems (Little-Endian) store the least significant byte first.
+	- To resolve differences like this many RPC systems define a machine independent representation of data. One such representation is known as sternal data representation (XDR)
+	- Client side, parameter marshalling involves converting the machine-dependent data into XDR before being sent to the server
+	- Server side, the XDR data are unmarshalled and converted to the machine-dependent representation for the server
+- Another issue involves the semantics of a call. Local procedure calls fail only under extreme circumstances. RPCs can fail, be duplicate and executed more than once, as a result of common network errors.
+		- Exactly once is the method to solve this issue. Essentially ensure that the call is acted on exactly once as opposed to at most once.
+	- **At most once** - can be implemented by attaching a timestamp to each message. The server must keep a history of all the timestamps of messages it has already process or a history large enough to ensure that repeated messages are detected.
+		- Incoming messages that have a timestamp already in the history are ignored. The client can then send a message one ore more times and be assured that it only executes once
+	- **Exactly once** - we need to remove the risk that the server will never receive the request.
+		- To accomplish this, the server must implement the "at most once" protocol, but must also acknowledge tot he client that the RPC call was received and executed. These ACK messages are common throughout networking. The client must resent each RPC call periodically until it receives the ACK for that call. 
+		- ACK - Acknowledge
+- Another issue concerns the communication between a server and a client
+	- With standard procedure calls, some form of binding takes place during link, load, or execution time so that a procedure call's name is replaced by the memory address of the procedure call. This also occurs in RPCs.  
+	- Two approaches to this
+		- Binding information may be predetermined, in the form of fixed port addresses. At compile time, an RPC call has a firxed port number associated with it. Once the program is compiled, the server cannot change the port number of the requested service
+		- Binding information can be done dynamically via a rendezvous mechanism.
+			- Typically an operating system provides a rendezvous(also called a matchmaker) dawmon on a fixed RPC port. A client sends a message containing the anme of the PRC to the rendezvous daemon request the port address of the RPC it needs to execute. The port number is returned and the RPC calls can be sent to that port untill the process terminates(or server crashes)
+- RPC scheme is usefull in implementing a distributed file system
+### 3.6.3 Pipes
+- A pipe acts as a conduit allowing two processes to communicate.
+- Pipes were one of the first IPC mechanisms in early UNIX systems
+- Provide one of the simpler ways for processes to communicate with one another, with limitations
+- Four issues must be considered when implementing a pipe
+	- Does the pipe allow bidirectional communication, or is communication unidirectional?
+	- If two-way communication is allowed, is it half duplex (data can travel only one way at a time) or full duplex (data can travel in both directions at the same time)?
+	- Must a relationship (such as **_parent–child_**) exist between the communicating processes?
+	- Can the pipes communicate over a network, or must the communicating processes reside on the same machine?
+#### Ordinary Pipes
+- Ordinary pipes allow two process to communicate in standard producer-consumer fashion
