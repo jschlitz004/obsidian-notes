@@ -196,7 +196,7 @@ The short-term scheduler must select a new process for the CPU frequently,
 - A system call like that can only be invoked by the parent of the process to be terminated.
 - The parent needs to know the id of its children if it is to terminate them.
 - Therefore when one process creates a new process, the id of the new process is passed to the parent.
-- A parent may terminate the execution of one of its childen for a variety of reassons
+- A parent may terminate the execution of one of its childen for a variety of reasons
 	- The child has exceeded its usage of some of the resources that it has been allocated
 	- The task assigned to the child is no longer require.
 	- The parent is exiting and the OS does not allow for the child to continue if the parent terminates
@@ -210,3 +210,44 @@ The short-term scheduler must select a new process for the CPU frequently,
 - The `init()` process invokes `wait()` periodically, thereby allowing the exit status of any orphaned processes to be collected. Thus release the orphan's pid and the process-table entry
 
 # 3.4 Inter process Communication
+- Process executing concurrently in the operating system may be either independent processes or cooperating processes. 
+- A process is **independent** if it cannot affect or be affected by the other processes executing in the system
+- A process is **cooperating** if it can affect or be affected by the other processes executing in the system. 
+- There are several reasons for providing an environment that allows process cooperation:
+	- **Information Sharing**. Since several users may be interested in teh same piece of information(for instance, a shared file), we must provide an environment to allow concurrent access to such information. 
+	- **Computation Speedup**. If we want a particular task to run faster, we must break it into substasks, each of which will be executing in parallel with the others. Notice that such a speedup can be achieved only if the computer has multiple processing cores.
+	- **Modularity**. We may want to construct the system in a modular fashion, dividing the system functions into separate processes or threads, as we discussed in Chapter 2. 
+	- **Convenience** Even an individual user may work on many tasks at the same time. For instance, a user may be editing, listening to music, and compiling in parallel. 
+- Cooperating processes require an i**nterprocess communication (IPC) mechanism** that will allow them to exchange data and information.
+- There are two fundamental models of interprocess communication: 
+	- Shared Memory - a region of memory that is shared by cooperating processes is established.
+		- Processes can then exchange information by readying and writing data to the shared region
+	- Message Passing - communication takes place by means of messages exchanged between the cooperating processes. 
+- Both aforementioned models are common in operating systems, and many systems implement both
+- Message passing is useful for exchanging smaller amounts of data, because no conflicts need be avoided. 
+- Message passing is also easier to implement in a stributed system than shared memory. 
+- Shared memory can be faster than message passing, since message-passing systems are typically implemented using system calls and thus require the more time-consuming task of kernel intervention. 
+
+![[Pasted image 20260917230520.png]]
+
+**Figure 3.12** Communications models. (a) Message passing. (b) Shared memory.
+#### Multiprocess Architecture- Chrome Browser
+- Chrome uses a multiprocess architcture. The browse utilizes three processes
+	- The **browser** process is responsible for managing the user interface as well as disk and network I/O. A new browser process is created when Chrome is started. Only one browser process is created.
+	- **Renderer** processes contain logic for rendering web pages. Thus, they contain the logic for handling HTML, Javascript, images, and so forth. As a general rule, a new renderer process is created for each website opened in a new tab, and so several renderer processes may be active at the same time.
+	- A **plug-in** process is created for each type of plug-in (such as Flash or QuickTime) in use. Plug-in processes contain the code for the plug-in as well as additional code that enables the plug-in to communicate with associated renderer processes and the browser process.
+
+### Shared-Memory Systems
+- Inter process communication using shared memory requires communicating procersses to establish a region of shared memory.
+- A shared memory region resides in the address space of the process creating the share-memory segment.
+- The OS tries to prevent one process from accessing another process's memroy. Shared memory requires that two or more process agree to remove this restriction.
+	- They can then exchange information by reading and writing data in the shared areas.
+	- The processes are also respondible for ensuring that they are not writing to the same location simultaneously. 
+
+#### Producer Consumer Problem
+- A **producer** process produces information that is consumed by a **consumer** process
+- For example,  a compiler may produce assmebly code that is consumed by an assembler. The assembler, in turn, may produce object modules that are consumed by the loader. 
+- One solution to the producer-consumer problem uses shared memory
+- Two types of buffers can be used
+	-  Unbounded buffer - places no practical limit on the size of the buffer
+	- Bounded buffer assumes a fixed buffer size. The consumer must wait if the buffer is empty and the producer must wait if the buffer is full. 
