@@ -47,15 +47,15 @@ Although two processes may be associated wiht the same program they are neverthe
 
 #### TLDR, the process control block contains all information about the process,
 
-# # Threads
+### Threads
 
-- A program that performs a single thread of execution can be exemplified by a processing running a word-processor-program where a user cannot simultaneously type and run a spell checker
+- A program that performs a single thread of execution can be exemplified by a process running a word-processor-program where a user cannot simultaneously type and run a spell checker
 - Most modern operating systems allow a process to have multiple threads of execution.
 
 ### Process Representation in Linux
-- A process control block (PCB) in Linux OS is represented by the C Structure tast_struct
+- A process control block (PCB) in Linux OS is represented by the C Structure task_struct
 	- Can be found in linux/sched.h in the kernel
-	- The structure contains all necessary information fo rrepresenting a processing
+	- The structure contains all necessary information for representing a process
 		- State of the process
 		- scheduling and memory management info
 		- list of open files
@@ -67,10 +67,14 @@ Although two processes may be associated wiht the same program they are neverthe
 - The objective of time-sharing is to switch the CPU among processes so frequently that the user can interact with each program while it is running. 
 - To meet these objectives, the **process scheduler** selects an available process for program execution on the CPU
 - For a single-processor system, there will never be more than one running process.
+	- Examples
+		- Digital Alarm Clock
+		- Microwave ovens
+		- Car Key Fobs
 ## 3.2.1 Scheduling Queues
 
 - As processes enter the system, they are put into a job queue, which consists of all processes in the system. The processes that are residing in main memory are ready and waiting to execute are kept on a list called the ready queue. (Generally stored as a linked list)
-- The ready-queue header contains pointers to the first and final Process controll blocks (PCBs) in the list. Each PCB includes a pointer field that points to the next PCB in the ready queue. 
+- The ready-queue header contains pointers to the first and final Process control blocks (PCBs) in the list. Each PCB includes a pointer field that points to the next PCB in the ready queue. 
 - The system also includes other queues
 	- device queue is a list of processes waiting for a particular I/0 device 
 - A common representation of process scheduling is a queueing diagram.
@@ -99,7 +103,7 @@ The short-term scheduler must select a new process for the CPU frequently,
 		- if it takes 10 ms to decide to execute a process for 100 ms, then  9% of the cpu is being used for scheduling, and is being WASTED
 	
 ### Long Term Scheduler LT
-- Long-term scheduler executes much less frequently; minutes may sepsarate the creation of onew new process and the next.
+- Long-term scheduler executes much less frequently; minutes may separate the creation of  a new new process and the next.
 - The LT scheduler controls the degree of multiprogramming (number of processes in memory). If the degree of multiprogramming is stable, the average rate of process creation must be equal to the average departure rate of processes leaving the system. Thus, the long-term scheduler may need to be invoked only when a process leaves the system. 
 - Due to the longer interval between executions, the LT scheduler can afford to take more time to decide which process should be selected for execution. 
 - It is important that the LT scheduler make a careful selection.
@@ -120,16 +124,16 @@ The short-term scheduler must select a new process for the CPU frequently,
 - Swapping may be necessary to improve the process mix or because a change in memory requirements has overcommitted acailable memory, requiring memory to be freed up. 
 
 ## Context Switch
-- **Context Switch -** when the switching the CPU to another process requires performing a state save of the current process and  state restore of ta different process.
+- **Context Switch -** the switching of  the CPU to another process requires performing a state save of the current process and  state restore of a different process.
 
 - When an interrupt occurs, the system needs to save the current context of the process running on the CPU so that it can restore that context when its processing is done.
 	- Essentially suspending and resuming the process
 - The context is represented in the PCB of the process. 
-	- It includes the value of the CPU registers, the process tate, and memory-management information. 
+	- It includes the value of the CPU registers, the process state, and memory-management information. 
 - Generically, we perform a state save of the current state of the CPU, be it in kernel or user mode, and then a state restore to resume operations.
 - Time to switch depends on memory speed and # or registers needing to be saved
 	- Very dependent on hardware support
-- Average speed of a context switch is a few seconds
+- Average speed of a context switch is a few ms 
 ### Multitasking in Mobile Systems
 - Due to mobile device constraints early versions of iOS did not provide user-application multitasking; only one application ran in the foreground while all other user applications were suspended
 - OS tasks were multitasked because they were written by Apple and well behaved.
@@ -139,4 +143,70 @@ The short-term scheduler must select a new process for the CPU frequently,
 - Multitasking limited due to battery life and memory use concerns. 
 
 # 3.3 Operations on Processes
-- The proccess in most systems can execute conceurrently and they may be created and deleted dynamically. Thus these systems must pro
+- The processes in most systems can execute concurrently and they may be created and deleted dynamically. Thus these systems must provide a mechanism for process creation and termination. 
+## 3.3.1 Process Creation
+- During the course of execution a process may create several new processes. 
+- A process that creates a process is a parent process and the process created is a child process. Processes can create new processes, so the end result is a process tree.
+- Most OS (Unix, Linux, Windows) identify processes according to a process identifier (or PID)
+- pid - process identifier, typically an integer number
+	- a unique value for each process in the system
+	- can be used as index to access various attributes of a process within the kernel
+- `ps -el` - command used to obtain a list of processes
+![[Pasted image 20260916151111.png]]
+
+### Child Processes 
+
+- Child Processes need resources when they are created
+	- A child process can have unfettered access to resources through the Operating system
+	- A child process can be limited or restricted to a subset of it's parent process's resources
+- Parent process may pass along initialization data (input) to the child process
+	- Example: A process whose function is to display the contents of a file --say, image.jpeg---on the terminal screen. 
+- When a process creates a new process, two possibilities for execution exist:
+	- The parent continues to execute concurrently with it's children
+	- The parent waits until some or all of its children have terminated
+- There are also two address-space possibilities for the new process:
+	- The child process is a duplicate of the parent process (it has the same program and data as the parent)
+	- The child process has a new program loaded into it. 
+#### Example of process creation differences
+##### Unix Example 
+- A new process is created by the `fork()` system call
+	- The new process consists of a copy of the address space of the original process. This mechanism allows the parent process to communicate easily with its child process.
+	- Both processes (parent and child) continue execution at the instruction after the `fork()`  with one difference, the return code for the `fork()` is zero for the new child process whereas the nonzero pid of the child is returned to the parent
+- After a `fork()` call  one of the two processes typically uses the `exec()` system call to replace the process's memory space with a new program. 
+- The `exec()` system call loads a binary file into memory (destroying the memory image of the program containing the `exec()` system call) and starts its execution
+- The call to `exec()` does not return control unless an error occurs, because it overlays the process's address space with a new program
+- 
+![images](https://learning.oreilly.com/api/v2/epubs/urn:orm:book:9781118063330/files/images/ch003-f010.jpg)
+
+**Figure 3.10** Process creation using the fork() system call.
+
+##### Windows Example
+- A new process is created by the `CreateProcess()` Function in the Windows API
+- Differences between `fork()` and `CreateProcess()`
+	- `fork()` has a child process inheriting the address space of its parent
+	- `CreateProcess()` requires loading a specified program into the address space of the child process at process creation.
+	- `fork()` is passed no parameters where as `CreateProcess()` expects no less than 10 parameters
+
+## 3.3.2 Process Termination
+- A process terminates when it finishes executing its final statement
+- A process asks the operating system to delete it using the `exit()` system call 
+- When a process exits, it returns a status value (usually int) to it's parent process using the `wait()` system call.
+- All resources of the process-- Including physical and veirtual memory, open files, and I/O buffers are deallocated by the OS
+- A process can cause the termination of another process vai an appropriate system call.
+- A system call like that can only be invoked by the parent of the process to be terminated.
+- The parent needs to know the id of its children if it is to terminate them.
+- Therefore when one process creates a new process, the id of the new process is passed to the parent.
+- A parent may terminate the execution of one of its childen for a variety of reassons
+	- The child has exceeded its usage of some of the resources that it has been allocated
+	- The task assigned to the child is no longer require.
+	- The parent is exiting and the OS does not allow for the child to continue if the parent terminates
+- **Cascading termination** - If a process terminates then all of it's children must also be terminated. This is usually initiated by the OS
+- `exit()` - can be called either directly or indirectly
+- A parent process may wait for the termination of a child process by using the `wait()` system call. The wait() system call is passed a parameter that allows the parent to obtain the exit status of the child.
+	- This system call returns the pid of the terminated child in addition to it's exit status
+- A process that has terminated by whose parent has not yet called `wait()`, is known as a zombie process
+- All processes become a zombie process, but only briefly as once the parent calls wait(), the pid of the zombie process and its entry in the process table are released.
+- When a parent does not invoke wait(), and is instead terminated the child processes are known as orphans. In Unix / Linux the OS assigns the init process as the new parent to orphan processes.
+- The `init()` process invokes `wait()` periodically, thereby allowing the exit status of any orphaned processes to be collected. Thus release the orphan's pid and the process-table entry
+
+# 3.4 Inter process Communication
