@@ -214,7 +214,7 @@ The short-term scheduler must select a new process for the CPU frequently,
 - A process is **independent** if it cannot affect or be affected by the other processes executing in the system
 - A process is **cooperating** if it can affect or be affected by the other processes executing in the system. 
 - There are several reasons for providing an environment that allows process cooperation:
-	- **Information Sharing**. Since several users may be interested in teh same piece of information(for instance, a shared file), we must provide an environment to allow concurrent access to such information. 
+	- **Information Sharing**. Since several users may be interested in the same piece of information(for instance, a shared file), we must provide an environment to allow concurrent access to such information. 
 	- **Computation Speedup**. If we want a particular task to run faster, we must break it into substasks, each of which will be executing in parallel with the others. Notice that such a speedup can be achieved only if the computer has multiple processing cores.
 	- **Modularity**. We may want to construct the system in a modular fashion, dividing the system functions into separate processes or threads, as we discussed in Chapter 2. 
 	- **Convenience** Even an individual user may work on many tasks at the same time. For instance, a user may be editing, listening to music, and compiling in parallel. 
@@ -239,11 +239,11 @@ The short-term scheduler must select a new process for the CPU frequently,
 
 ### 3.4.1 Shared-Memory Systems
 - Inter process communication using shared memory requires communicating processes to establish a region of shared memory.
-- A shared memory region resides in the address space of the process creating the share-memory segment.
+- A shared memory region resides in the address space of the process creating the shared-memory segment.
 - The OS tries to prevent one process from accessing another process's memory. Shared memory requires that two or more process agree to remove this restriction.
 	- They can then exchange information by reading and writing data in the shared areas.
 	- The processes are also responsible for ensuring that they are not writing to the same location simultaneously. 
-- This scheme requires that these processes share a region of memory and that hte code for accessing and manipulating the shared memory be written explicitly by the application programmer. 
+- This scheme requires that these processes share a region of memory and that the code for accessing and manipulating the shared memory be written explicitly by the application programmer. 
 
 #### Producer Consumer Problem
 - A **producer** process produces information that is consumed by a **consumer** process
@@ -268,21 +268,21 @@ The short-term scheduler must select a new process for the CPU frequently,
 		 - Automatic or explicit buffering 
 #### 3.4.2.1 Methods of Communication Link
 #### Direct communication
- - Each process must explicitly name the recipient or send of the communication. Thus `send()` and r`receive()` would look like this
+ - Each process must explicitly name the recipient or send of the communication. Thus `send()` and receive()` would look like this
 	 - send(P, message) - Send a message to process P
 	 - receive(Q, message)___ Received a message from process Q
  - Properties of this type of communication link
-	 - A link is established automatically between very pair of processes that want to communicate. 
+	 - A link is established automatically between the very pair of processes that want to communicate. 
 	 - A link is associated with exactly two processes.
 	 - Between each pair of processes, there exists exactly one link
 	 - This is a symmetrical scheme
-	 - A variant of this could be asymmetrical where the addressing asymmetrical
+	 - A variant of this could be asymmetrical where the addressing is asymmetrical
 		 - send(P, message) - Send a message to process P
 		 - receive(id, message) Receive a message from any process. The variable id is set to the name of the process with which communication has taken place. 
  - Disadvantages
 	 - Limited modularity. Changing the identifier of a process may necessitate examining all other process definitions. All references to the old identifier must be found so that they can be modified to the new identifier. Such hard-coding techniques, where identifiers must be explicitly state, are less desirable than techniques involving indrection
 ##### Indirect Communication
-- Messages are sent to and received from **mailboxes**, or **ports**. A mailbox can be viewed abstracting as an object into which messages can be placed by processes and from which messages can be removed.
+- Messages are sent to and received from **mailboxes**, or **ports**. A mailbox can be viewed by abstracting an object into which messages can be placed by processes and from which messages can be removed.
 - Mailbox
 	- Unique Identification
 	- Can either be owned either by a process or by the operating system
@@ -314,10 +314,10 @@ Now suppose that processes P_1, _P_2, and _P_3 all share mailbox _A. Process P_1
 			- Send and receive messages through the mailbox.
 			- Delete a mailbox
 		- The process that creates a new mailbox is that mailbox's owner by default.
-		- Ownership and reciving privilege may be passed to othe rprocess through appropriate system calls.
+		- Ownership and reciving privilege may be passed to other processes through appropriate system calls.
 
 #### 3.4.2.2 Synchronization
-- Message passing may be either **** or **nonblocking** - also known as **synchronous** and **asynchronous**
+- Message passing may be either **blocking** or **nonblocking**  - also known as **synchronous** and **asynchronous**
 - Types
 	- **Blocking send** - The sending process is blocked until the message is received by the receiving process or mailbox 
 	- **Nonblocking send** - The sending process sends the message and resumes operation 
@@ -341,13 +341,13 @@ Now suppose that processes P_1, _P_2, and _P_3 all share mailbox _A. Process P_1
 - A socket is defined as an endpoint for communication.  A pair of processes communicating over a network employs a pair of sockets - one for each process.
 - A socket is identified by an IP address concatenated with a port number. 
 	- e.g. 192.23.2.53:1060
-- In general sockets use a client-server architecture. The server waits for incoming client requests by listening to a specified port. Once a request is received, the server accepts a connection from the client socket to complete the connection. Servers implementing specific services( such as telnet, FTP and HTTP) listen to well known ports 
+- In general sockets use a client-server architecture. The server waits for incoming client requests by listening to a specified port. Once a request is received, the server accepts a connection from the client socket to complete the connection. Servers implementing specific services( such as telnet, FTP and HTTP) listen to **well known** ports 
 	- a telnet server listens to port 23; 
 	- an FTP sever listens to port 21
 	- a web or HTTP server listens to port 80
-- All ports below 1024 are considered well known; We use them to implement standard services
+- All ports below 1024 are considered **well known**; We use them to implement standard services
 - When a client process initiates a request for a connection it is assigned a port by its computer and the port number must be greater than 1024, it will request a connection with the webserver at port 80
-- All connections must unique, so if another client process wants to make a request to the webserver, it will have another port number greater than 1024 assigned to it
+- All connections must be unique, so if another client process wants to make a request to the webserver, it will have another port number greater than 1024 assigned to it
 - Java provides three different types of sockets
 	- Connection-oriented (TCP) sockets
 	- Connectionless (UDP) sockets
@@ -355,7 +355,7 @@ Now suppose that processes P_1, _P_2, and _P_3 all share mailbox _A. Process P_1
 - How a date server (java) communicates with TCP sockets
 	- The clients request the current date and time from the server. 
 	- The server listens to port 6012 or any arbitrary port > 1024. 
-	- The server blocks on the accept() method and waits for a client ro request a connection
+	- The server blocks on the accept() method and waits for a client to request a connection
 	- When a connection request is received, the accept() method returns a socket that the server can use to communicate with the client. 
 	- The server first establishes a printerwriter object that it will use to communicate with the client.
 		- A printwriter object allows the server to write to the socket using the routine print() and println() methods
@@ -368,7 +368,7 @@ Now suppose that processes P_1, _P_2, and _P_3 all share mailbox _A. Process P_1
 ### 3.6.2 Remote Procedure Calls
 - One of the most common forms of remote service is the RPC paradigm,
 - Designed as a way to abstract the procedure-call mechanism for use between systems with network connections. 
-- It is similar to the PC mechanism described in 3.4 and is usually built on top of such a system.
+- It is similar to the IPC mechanism described in 3.4 and is usually built on top of such a system.
 - Uses a messaged-based communication scheme
 - RPC messages are well structured and thus are no longer just packets of data.
 - Each message is addressed to an RPC daemon listening to a port on the remote system.
@@ -397,8 +397,8 @@ Now suppose that processes P_1, _P_2, and _P_3 all share mailbox _A. Process P_1
 	- Two approaches to this
 		- Binding information may be predetermined, in the form of fixed port addresses. At compile time, an RPC call has a firxed port number associated with it. Once the program is compiled, the server cannot change the port number of the requested service
 		- Binding information can be done dynamically via a rendezvous mechanism.
-			- Typically an operating system provides a rendezvous(also called a matchmaker) dawmon on a fixed RPC port. A client sends a message containing the anme of the PRC to the rendezvous daemon request the port address of the RPC it needs to execute. The port number is returned and the RPC calls can be sent to that port untill the process terminates(or server crashes)
-- RPC scheme is usefull in implementing a distributed file system
+			- Typically an operating system provides a rendezvous(also called a matchmaker) daemon on a fixed RPC port. A client sends a message containing the name of the RPC to the rendezvous daemon and requests the port address of the RPC it needs to execute. The port number is returned and the RPC calls can be sent to that port untill the process terminates(or server crashes)
+- RPC scheme is useful in implementing a distributed file system
 ### 3.6.3 Pipes
 - A pipe acts as a conduit allowing two processes to communicate.
 - Pipes were one of the first IPC mechanisms in early UNIX systems
