@@ -410,3 +410,7 @@ Now suppose that processes P_1, _P_2, and _P_3 all share mailbox _A. Process P_1
 	- Can the pipes communicate over a network, or must the communicating processes reside on the same machine?
 #### Ordinary Pipes
 - Ordinary pipes allow two process to communicate in standard producer-consumer fashion
+- Must have a parent-child relationship
+- The communication is unidirectional
+- Can't connect over a network
+
